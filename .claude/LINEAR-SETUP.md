@@ -1,0 +1,485 @@
+# LINEAR-SETUP.md — Client Site Template
+> Reusable Linear project file for every client site built from this template.
+> Fill in all `{{PLACEHOLDERS}}` before importing. Remove optional sections that don't apply.
+>
+> Import into Linear via: Settings → Import → CSV Import
+> Save the CSV block at the bottom as `{{CLIENT_SLUG}}-linear-import.csv`
+
+---
+
+## How to Use This File
+
+1. **Duplicate** this file into the cloned client repo's `.claude/` folder.
+2. **Find & replace** all placeholders (listed below) with real values.
+3. **Decide which optional modules apply** (Blog, Portfolio) and delete the ones you won't build.
+4. **Create the Linear team** using the Workspace Setup section.
+5. **Import issues** using the CSV block at the bottom.
+6. **Delete this "How to Use" section** after setup is done.
+
+### Placeholder Reference
+
+| Placeholder | Example | Description |
+|-------------|---------|-------------|
+| `{{PROJECT_NAME}}` | Acme Studio | Full display name of the project |
+| `{{CLIENT_SLUG}}` | acme-studio | Lowercase hyphenated slug (used in filenames) |
+| `{{TEAM_ID}}` | AS | 2–4 letter Linear team identifier — issues become `{{TEAM_ID}}-1` |
+| `{{SUPABASE_REF}}` | abcdefghijkl | Supabase project ref (from project URL) |
+| `{{GITHUB_REPO}}` | client-acme-studio | GitHub repo name inside the org |
+| `{{SITE_URL}}` | https://acmestudio.com | Production URL |
+
+---
+
+## Workspace Setup
+
+```
+Linear Workspace: Format Studio
+Team name:        {{PROJECT_NAME}}
+Team identifier:  {{TEAM_ID}}   →  issues: {{TEAM_ID}}-1, {{TEAM_ID}}-2, ...
+```
+
+---
+
+## Labels
+
+| Label | Color | Use |
+|-------|-------|-----|
+| `frontend` | Blue `#3B82F6` | React/Next.js component or page work |
+| `design` | Purple `#8B5CF6` | Design implementation from Pencil/Variants |
+| `infra` | Gray `#6B7280` | Supabase, Vercel, DNS, env setup |
+| `seo` | Orange `#F97316` | Metadata, sitemap, robots, OG |
+| `chore` | Yellow `#EAB308` | Setup, config, scaffolding |
+| `bug` | Red `#EF4444` | Defects found during QA |
+| `qa` | Green `#10B981` | Testing and verification tasks |
+
+---
+
+## Milestones
+
+```
+M0: Bootstrap          Fork template, env vars, local setup
+M1: Supabase Schema    Migrations, RLS, seed data
+M2: Config + Types     globals.css tokens, TypeScript types, queries
+M3: Layout             Header, Footer, root layout
+M4: Home Page          All home page sections
+M5: Inner Pages        About, Contact (and any other static pages)
+M6: Blog               [OPTIONAL] Post list + detail pages
+M7: Portfolio          [OPTIONAL] Work/projects grid + detail pages
+M8: Custom             [OPTIONAL] Client-specific features (pricing, booking, etc.)
+M9: QA + Launch        Final checks, deploy, DNS, handoff
+```
+
+---
+
+## Cycles
+
+```
+Cycle 1: M0 + M1 + M2 — Setup and schema
+Cycle 2: M3 + M4       — Layout and home page
+Cycle 3: M5 [+ M6]     — Inner pages [+ blog]
+Cycle 4: [M7] [+ M8]   — [Portfolio] [+ custom features]
+Cycle 5: M9            — QA and launch
+```
+
+---
+
+## All Issues
+
+---
+
+### M0 — Bootstrap
+
+**{{TEAM_ID}}-1** Fork template + local setup
+`chore` `infra` · Priority: Urgent · M0
+- Fork `format-studio-client-site-template` → `{{GITHUB_REPO}}`
+- Clone locally, run `pnpm install`, confirm no errors
+- Rename package.json name to `{{CLIENT_SLUG}}`
+
+**{{TEAM_ID}}-2** Configure environment variables
+`chore` `infra` · Priority: Urgent · M0
+- Create `.env.local` with all required vars
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `AGENCY_API_URL`, `AGENCY_CLIENT_ID`, `AGENCY_MANAGEMENT_TOKEN`
+- `REVALIDATE_SECRET` (generate: `openssl rand -hex 32`)
+- `NEXT_PUBLIC_SITE_URL={{SITE_URL}}`
+- Confirm `pnpm dev` starts without errors
+
+**{{TEAM_ID}}-3** Connect to client Supabase project
+`infra` · Priority: Urgent · M0
+- `supabase link --project-ref {{SUPABASE_REF}}`
+- Confirm connection with `supabase db pull`
+- Supabase ref: `{{SUPABASE_REF}}`
+
+---
+
+### M1 — Supabase Schema
+
+**{{TEAM_ID}}-4** Run core migrations (001–002)
+`infra` · Priority: Urgent · M1
+- `001_core.sql` — site_settings, nav_items, pages, form_submissions, media
+- `002_rls.sql` — RLS policies on all tables
+- Verify in Supabase dashboard: all tables visible, RLS enabled
+
+**{{TEAM_ID}}-5** Run blog migration (003)
+`infra` · Priority: Urgent · M1
+- [OPTIONAL — skip if no blog]
+- `003_blog.sql` — posts table + RLS
+- Verify `posts` table with RLS enabled
+
+**{{TEAM_ID}}-6** Run portfolio migration (004)
+`infra` · Priority: Urgent · M1
+- [OPTIONAL — skip if no portfolio]
+- `004_portfolio.sql` — projects, project_images + RLS
+- Verify both tables with RLS enabled
+
+**{{TEAM_ID}}-7** Seed initial content
+`infra` · Priority: High · M1
+- Seed `site_settings`: site_name, tagline, contact email, SEO defaults, social links
+- Seed `nav_items`: initial navigation (Home, About, Contact [Blog] [Work])
+- Seed `pages`: home, about, contact stubs (title + empty sections array)
+- Confirm seeded data readable via Supabase dashboard
+
+---
+
+### M2 — Config + Types
+
+**{{TEAM_ID}}-8** Configure design tokens in globals.css
+`design` `chore` · Priority: Urgent · M2
+- Map brand tokens: `--color-bg`, `--color-surface`, `--color-border`
+- Map text tokens: `--color-text`, `--color-text-muted`, `--color-accent`
+- Set `--font-sans`, `--font-serif` from client styleguide
+- Write prose styles for blog/body copy
+- These are permanent — names must not change after this point
+
+**{{TEAM_ID}}-9** Configure next.config.ts
+`chore` · Priority: High · M2
+- `images.remotePatterns` for `{{SUPABASE_REF}}.supabase.co`
+- Any other image hosts required by client assets
+
+**{{TEAM_ID}}-10** Set up Supabase client files
+`chore` · Priority: High · M2
+- `src/lib/supabase/server.ts` — anon key, for Server Components
+- `src/lib/supabase/client.ts` — browser client (forms only)
+
+**{{TEAM_ID}}-11** Write all TypeScript content types
+`frontend` · Priority: Urgent · M2
+- `src/types/content.ts` — all interfaces matching Supabase schema
+- Core: `SiteSettings`, `NavItem`, `Page`, `PageSection`, `FormSubmission`, `Media`
+- Section types: `HeroSection`, `FeaturesSection`, `AboutSection`, `TestimonialsSection`, `CTASection`
+- [OPTIONAL] `Post` (blog)
+- [OPTIONAL] `Project`, `ProjectImage` (portfolio)
+- All fields must match DB column names exactly
+
+**{{TEAM_ID}}-12** Write all query functions
+`frontend` · Priority: Urgent · M2
+- `src/lib/queries.ts` — all Supabase reads go through this file
+- Core: `getSiteSettings()`, `getNavItems()`, `getPage(slug)`, `getPublishedPages()`
+- [OPTIONAL] `getPublishedPosts()`, `getPostBySlug()`, `getPostSlugs()`
+- [OPTIONAL] `getPublishedProjects()`, `getProjectBySlug()`, `getProjectImages()`
+- All functions throw on Supabase error
+
+---
+
+### M3 — Layout
+
+**{{TEAM_ID}}-13** Design: Header + Footer (Pencil)
+`design` · Priority: Urgent · M3
+- Design Header: logo, desktop nav, mobile hamburger, CTA button
+- Design Footer: site name, tagline, social links, contact, copyright
+- Export from Pencil before starting build
+
+**{{TEAM_ID}}-14** Build Header
+`frontend` · Priority: Urgent · M3
+- `src/components/layout/Header.tsx` — Server Component
+- Logo, nav from `getNavItems()`, sticky with backdrop blur
+- `src/components/layout/NavLink.tsx` — `usePathname()` active state
+- `src/components/layout/MobileNav.tsx` — hamburger, closes on link click
+- Adapted from Pencil design ({{TEAM_ID}}-13)
+
+**{{TEAM_ID}}-15** Build Footer
+`frontend` · Priority: High · M3
+- `src/components/layout/Footer.tsx` — Server Component
+- Site name, tagline, social links from `getSiteSettings()`
+- Copyright with current year
+- Adapted from Pencil design ({{TEAM_ID}}-13)
+
+**{{TEAM_ID}}-16** Build root layout
+`frontend` · Priority: Urgent · M3
+- `src/app/layout.tsx` — `generateMetadata()` from `getSiteSettings()`
+- Wire Header + Footer
+- `title.template`: `'%s | {{PROJECT_NAME}}'`
+- OG image default via `metadataBase`
+
+---
+
+### M4 — Home Page
+
+**{{TEAM_ID}}-17** Design: all home page sections (Pencil)
+`design` · Priority: Urgent · M4
+- Design HeroSection, FeaturesSection, AboutPreviewSection, TestimonialsSection, CTASection
+- Each section: empty state, populated state, mobile breakpoint
+- Export from Pencil before starting build
+
+**{{TEAM_ID}}-18** Build HeroSection
+`frontend` · Priority: Urgent · M4
+- `src/components/sections/HeroSection.tsx` + `HeroSectionClient.tsx`
+- All strings from JSONB (`headline`, `subheadline`, `cta_label`, `cta_url`, `image_url`)
+- Zero hardcoded strings
+- Framer Motion on page load
+- Adapted from Pencil design ({{TEAM_ID}}-17)
+
+**{{TEAM_ID}}-19** Build FeaturesSection
+`frontend` · Priority: High · M4
+- `src/components/sections/FeaturesSection.tsx`
+- `title`, `items[]` from JSONB
+- Framer Motion stagger
+- Adapted from Pencil design ({{TEAM_ID}}-17)
+
+**{{TEAM_ID}}-20** Build AboutPreviewSection
+`frontend` · Priority: High · M4
+- `src/components/sections/AboutPreviewSection.tsx`
+- `body`, `image_url`, `cta_label`, `cta_url` from JSONB
+- Framer Motion slide-in
+- Adapted from Pencil design ({{TEAM_ID}}-17)
+
+**{{TEAM_ID}}-21** Build TestimonialsSection
+`frontend` · Priority: High · M4
+- `src/components/sections/TestimonialsSection.tsx`
+- `items[]` (`quote`, `author`, `role`, `avatar_url`) from JSONB
+- Framer Motion stagger
+- Adapted from Pencil design ({{TEAM_ID}}-17)
+
+**{{TEAM_ID}}-22** Build CTASection
+`frontend` · Priority: Medium · M4
+- `src/components/sections/CTASection.tsx`
+- `headline`, `subheadline`, `button_label`, `button_url` from JSONB
+- Adapted from Pencil design ({{TEAM_ID}}-17)
+
+**{{TEAM_ID}}-23** Build SectionRenderer + home page route
+`frontend` · Priority: Urgent · M4
+- `src/components/sections/SectionRenderer.tsx` — switch on `section.type`
+- `src/app/(site)/page.tsx` — calls `getPage('home')`, renders sections array
+- `export const revalidate = 3600`
+- `generateMetadata()` from page SEO fields
+
+**{{TEAM_ID}}-24** Build contact form
+`frontend` · Priority: High · M4
+- `src/components/ContactForm.tsx` — `'use client'`
+- Submits to `POST /api/submit-form`
+- Field validation client-side (required fields)
+- Success / error states
+
+---
+
+### M5 — Inner Pages
+
+**{{TEAM_ID}}-25** Design: About + Contact pages (Pencil)
+`design` · Priority: High · M5
+- About page: full layout, portrait image, bio, values/approach sections
+- Contact page: form layout, contact details
+- Export from Pencil before starting build
+
+**{{TEAM_ID}}-26** Build About page
+`frontend` · Priority: High · M5
+- `src/app/(site)/about/page.tsx`
+- Reads page sections from `getPage('about')`
+- `generateMetadata()` from page SEO fields
+- Adapted from Pencil design ({{TEAM_ID}}-25)
+
+**{{TEAM_ID}}-27** Build Contact page
+`frontend` · Priority: High · M5
+- `src/app/(site)/contact/page.tsx`
+- Reads content from `getPage('contact')`
+- Includes `<ContactForm />` wired to `POST /api/submit-form`
+- `generateMetadata()` from page SEO fields
+- Adapted from Pencil design ({{TEAM_ID}}-25)
+
+**{{TEAM_ID}}-28** Build sitemap + robots
+`seo` · Priority: Medium · M5
+- `src/app/sitemap.ts` — static routes + dynamic page slugs
+- `src/app/robots.ts` — allow all, point to sitemap
+- Confirm sitemap accessible at `{{SITE_URL}}/sitemap.xml`
+
+---
+
+### M6 — Blog [OPTIONAL]
+
+> Delete this entire section if this client has no blog.
+
+**{{TEAM_ID}}-29** Design: Blog list + post page (Pencil)
+`design` · Priority: High · M6
+- Blog list: card grid, author, date, excerpt, cover image
+- Post page: full-width cover, title, metadata, rich text body
+- Export from Pencil before starting build
+
+**{{TEAM_ID}}-30** Build blog list page
+`frontend` · Priority: High · M6
+- `src/app/(site)/blog/page.tsx`
+- Reads from `getPublishedPosts()`
+- `generateMetadata()` with blog description
+- Adapted from Pencil design ({{TEAM_ID}}-29)
+
+**{{TEAM_ID}}-31** Build post detail page
+`frontend` · Priority: High · M6
+- `src/app/(site)/blog/[slug]/page.tsx`
+- Reads from `getPostBySlug(slug)`
+- `generateStaticParams()` from `getPostSlugs()`
+- `generateMetadata()` from post SEO fields
+- Renders HTML content from Tiptap (sanitised)
+- Adapted from Pencil design ({{TEAM_ID}}-29)
+
+---
+
+### M7 — Portfolio [OPTIONAL]
+
+> Delete this entire section if this client has no portfolio/work section.
+
+**{{TEAM_ID}}-32** Design: Work grid + project page (Pencil)
+`design` · Priority: Medium · M7
+- Work grid: project cards with cover, title, category
+- Project detail: full hero, images, description
+- Export from Pencil before starting build
+
+**{{TEAM_ID}}-33** Build work list page
+`frontend` · Priority: Medium · M7
+- `src/app/(site)/work/page.tsx`
+- Reads from `getPublishedProjects()`
+- `generateMetadata()`
+- Adapted from Pencil design ({{TEAM_ID}}-32)
+
+**{{TEAM_ID}}-34** Build project detail page
+`frontend` · Priority: Medium · M7
+- `src/app/(site)/work/[slug]/page.tsx`
+- Reads from `getProjectBySlug(slug)` + `getProjectImages(id)`
+- `generateStaticParams()` from project slugs
+- `generateMetadata()` from project SEO fields
+- Adapted from Pencil design ({{TEAM_ID}}-32)
+
+---
+
+### M8 — Custom Features [OPTIONAL]
+
+> Add client-specific issues here. Delete this section if not applicable.
+> Examples: booking system, pricing page, gallery lightbox, newsletter signup.
+
+---
+
+### M9 — QA + Launch
+
+**{{TEAM_ID}}-35** Deploy to Vercel
+`infra` · Priority: Urgent · M9
+- Import `{{GITHUB_REPO}}` into Vercel
+- Set all env vars (same as `.env.local` but production values)
+- Confirm `pnpm build` passes in Vercel
+- Assign `{{SITE_URL}}` as custom domain
+
+**{{TEAM_ID}}-36** Smoke test: all pages
+`qa` · Priority: Urgent · M9
+- Home page loads, all sections render, no missing images
+- About + Contact pages load
+- [OPTIONAL] Blog list loads, post pages load
+- [OPTIONAL] Work grid loads, project pages load
+- Contact form submits → appears in Supabase `form_submissions`
+
+**{{TEAM_ID}}-37** Smoke test: ISR revalidation
+`qa` · Priority: Urgent · M9
+- Edit a page section in client-portal
+- Confirm `POST /api/revalidate` fires (portal logs)
+- Confirm updated content appears on `{{SITE_URL}}` within 10s
+
+**{{TEAM_ID}}-38** SEO + metadata audit
+`seo` · Priority: High · M9
+- All pages have unique `<title>` and `<meta description>`
+- OG image present on home, about, [blog posts]
+- Sitemap accessible and includes all published pages
+- Robots.txt allows indexing
+- Run Lighthouse: Performance ≥ 90, Accessibility ≥ 95
+
+**{{TEAM_ID}}-39** Final security check
+`qa` · Priority: High · M9
+- `REVALIDATE_SECRET` is 32+ chars, not in git history
+- No `.env.local` committed
+- Supabase RLS enabled on every table (check in dashboard)
+- Service role key not referenced anywhere in this repo
+
+**{{TEAM_ID}}-40** Client handoff
+`chore` · Priority: High · M9
+- Record loom walkthrough: editing pages, blog, nav, settings via client-portal
+- Share Vercel project access (view only)
+- Share Supabase project access (read only, or no access depending on agreement)
+- Mark project live in Agency Hub
+
+---
+
+## Issue Dependency Graph
+
+```
+{{TEAM_ID}}-1, -2, -3 (Bootstrap)
+  ↓
+{{TEAM_ID}}-4..7 (Schema)
+  ↓
+{{TEAM_ID}}-8..12 (Config + Types)
+  ↓
+{{TEAM_ID}}-13..16 (Layout)
+  ↓
+{{TEAM_ID}}-17..24 (Home Page)
+  ↓
+{{TEAM_ID}}-25..28 (Inner Pages)
+  ↓
+[{{TEAM_ID}}-29..31] (Blog — optional)
+[{{TEAM_ID}}-32..34] (Portfolio — optional)
+[{{TEAM_ID}}-M8 issues] (Custom — optional)
+  ↓
+{{TEAM_ID}}-35..40 (QA + Launch)
+```
+
+---
+
+## CSV Import Block
+
+> Fill in `{{TEAM_ID}}` references in this section before saving as CSV.
+> Save as `{{CLIENT_SLUG}}-linear-import.csv` and import via Linear → Settings → Import → CSV Import.
+> Delete optional rows (M6, M7, M8) if those modules don't apply.
+
+```csv
+Title,Description,Status,Priority,Label,Milestone
+Fork template + local setup,"Fork format-studio-client-site-template → {{GITHUB_REPO}}. Clone locally. Run pnpm install. Confirm no errors. Rename package.json name to {{CLIENT_SLUG}}.",Todo,Urgent,chore,M0: Bootstrap
+Configure environment variables,"Create .env.local: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, AGENCY_API_URL, AGENCY_CLIENT_ID, AGENCY_MANAGEMENT_TOKEN, REVALIDATE_SECRET (openssl rand -hex 32), NEXT_PUBLIC_SITE_URL={{SITE_URL}}. Confirm pnpm dev starts.",Todo,Urgent,chore,M0: Bootstrap
+Connect to client Supabase project,"supabase link --project-ref {{SUPABASE_REF}}. Confirm connection with supabase db pull.",Todo,Urgent,infra,M0: Bootstrap
+Run core migrations (001–002),"001_core.sql: site_settings, nav_items, pages, form_submissions, media. 002_rls.sql: RLS on all tables. Verify in Supabase dashboard.",Todo,Urgent,infra,M1: Supabase Schema
+Run blog migration (003),"[OPTIONAL] 003_blog.sql: posts table + RLS. Skip if no blog.",Todo,Urgent,infra,M1: Supabase Schema
+Run portfolio migration (004),"[OPTIONAL] 004_portfolio.sql: projects, project_images + RLS. Skip if no portfolio.",Todo,Urgent,infra,M1: Supabase Schema
+Seed initial content,"Seed site_settings (site_name, tagline, contact email, SEO defaults, socials). Seed nav_items. Seed pages: home, about, contact stubs.",Todo,High,infra,M1: Supabase Schema
+Configure design tokens in globals.css,"Map brand tokens: --color-bg, --color-surface, --color-border, --color-text, --color-text-muted, --color-accent. Set fonts. Write prose styles. Names are permanent.",Todo,Urgent,design,M2: Config + Types
+Configure next.config.ts,"images.remotePatterns for {{SUPABASE_REF}}.supabase.co. Add any other image hosts.",Todo,High,chore,M2: Config + Types
+Set up Supabase client files,"src/lib/supabase/server.ts (Server Components). src/lib/supabase/client.ts (browser forms only).",Todo,High,chore,M2: Config + Types
+Write all TypeScript content types,"src/types/content.ts: SiteSettings, NavItem, Page, PageSection, FormSubmission, Media. Section types: HeroSection, FeaturesSection, AboutSection, TestimonialsSection, CTASection. [OPTIONAL] Post, Project, ProjectImage. All fields match DB exactly.",Todo,Urgent,frontend,M2: Config + Types
+Write all query functions,"src/lib/queries.ts: getSiteSettings(), getNavItems(), getPage(slug), getPublishedPages(). [OPTIONAL] getPublishedPosts(), getPostBySlug(), getPostSlugs(). [OPTIONAL] getPublishedProjects(), getProjectBySlug(), getProjectImages(). All throw on error.",Todo,Urgent,frontend,M2: Config + Types
+Design: Header + Footer (Pencil),"Design Header: logo, desktop nav, mobile hamburger, CTA button. Design Footer: site name, tagline, social links, contact, copyright. Export before build.",Todo,Urgent,design,M3: Layout
+Build Header,"src/components/layout/Header.tsx (Server Component). Logo, nav from getNavItems(), sticky with backdrop blur. NavLink.tsx: usePathname() active state. MobileNav.tsx: hamburger, closes on link click.",Todo,Urgent,frontend,M3: Layout
+Build Footer,"src/components/layout/Footer.tsx (Server Component). Site name, tagline, social links from getSiteSettings(). Copyright with year.",Todo,High,frontend,M3: Layout
+Build root layout,"src/app/layout.tsx: generateMetadata() from getSiteSettings(). Wire Header + Footer. title.template: '%s | {{PROJECT_NAME}}'. OG image default.",Todo,Urgent,frontend,M3: Layout
+Design: all home page sections (Pencil),"Design HeroSection, FeaturesSection, AboutPreviewSection, TestimonialsSection, CTASection. Each: empty state, populated state, mobile breakpoint. Export before build.",Todo,Urgent,design,M4: Home Page
+Build HeroSection,"src/components/sections/HeroSection.tsx + HeroSectionClient.tsx. All strings from JSONB. Zero hardcoded strings. Framer Motion on page load.",Todo,Urgent,frontend,M4: Home Page
+Build FeaturesSection,"src/components/sections/FeaturesSection.tsx. title + items[] from JSONB. Framer Motion stagger.",Todo,High,frontend,M4: Home Page
+Build AboutPreviewSection,"src/components/sections/AboutPreviewSection.tsx. body, image_url, cta_label, cta_url from JSONB. Framer Motion slide-in.",Todo,High,frontend,M4: Home Page
+Build TestimonialsSection,"src/components/sections/TestimonialsSection.tsx. items[]: quote, author, role, avatar_url from JSONB. Framer Motion stagger.",Todo,High,frontend,M4: Home Page
+Build CTASection,"src/components/sections/CTASection.tsx. headline, subheadline, button_label, button_url from JSONB.",Todo,Medium,frontend,M4: Home Page
+Build SectionRenderer + home page route,"src/components/sections/SectionRenderer.tsx: switch on section.type. src/app/(site)/page.tsx: getPage('home'), render sections. export const revalidate = 3600. generateMetadata().",Todo,Urgent,frontend,M4: Home Page
+Build contact form,"src/components/ContactForm.tsx ('use client'). POST to /api/submit-form. Client-side validation. Success/error states.",Todo,High,frontend,M4: Home Page
+Design: About + Contact pages (Pencil),"About: full layout, portrait, bio, values/approach sections. Contact: form layout, contact details. Export before build.",Todo,High,design,M5: Inner Pages
+Build About page,"src/app/(site)/about/page.tsx. Reads sections from getPage('about'). generateMetadata().",Todo,High,frontend,M5: Inner Pages
+Build Contact page,"src/app/(site)/contact/page.tsx. Reads content from getPage('contact'). Includes ContactForm wired to POST /api/submit-form. generateMetadata().",Todo,High,frontend,M5: Inner Pages
+Build sitemap + robots,"src/app/sitemap.ts: static routes + dynamic page slugs. src/app/robots.ts: allow all, link to sitemap. Verify at {{SITE_URL}}/sitemap.xml.",Todo,Medium,seo,M5: Inner Pages
+Design: Blog list + post page (Pencil),"[OPTIONAL] Blog list: card grid, author, date, excerpt, cover. Post page: cover, title, metadata, rich text. Export before build.",Todo,High,design,M6: Blog
+Build blog list page,"[OPTIONAL] src/app/(site)/blog/page.tsx. getPublishedPosts(). generateMetadata().",Todo,High,frontend,M6: Blog
+Build post detail page,"[OPTIONAL] src/app/(site)/blog/[slug]/page.tsx. getPostBySlug(slug). generateStaticParams(). generateMetadata() from post SEO fields. Render Tiptap HTML (sanitised).",Todo,High,frontend,M6: Blog
+Design: Work grid + project page (Pencil),"[OPTIONAL] Work grid: project cards with cover, title, category. Project detail: hero, images, description. Export before build.",Todo,Medium,design,M7: Portfolio
+Build work list page,"[OPTIONAL] src/app/(site)/work/page.tsx. getPublishedProjects(). generateMetadata().",Todo,Medium,frontend,M7: Portfolio
+Build project detail page,"[OPTIONAL] src/app/(site)/work/[slug]/page.tsx. getProjectBySlug(slug) + getProjectImages(id). generateStaticParams(). generateMetadata().",Todo,Medium,frontend,M7: Portfolio
+Deploy to Vercel,"Import {{GITHUB_REPO}} into Vercel. Set all env vars (production values). Confirm pnpm build passes. Assign {{SITE_URL}} as custom domain.",Todo,Urgent,infra,M9: QA + Launch
+Smoke test: all pages,"Home page loads, all sections render. About + Contact load. [If blog] posts load. [If portfolio] work loads. Contact form submits → appears in form_submissions.",Todo,Urgent,qa,M9: QA + Launch
+Smoke test: ISR revalidation,"Edit a page section in client-portal. Confirm POST /api/revalidate fires. Confirm updated content appears on {{SITE_URL}} within 10s.",Todo,Urgent,qa,M9: QA + Launch
+SEO + metadata audit,"All pages have unique title and meta description. OG image on home + about. Sitemap accessible. Robots.txt allows indexing. Lighthouse: Performance ≥ 90, Accessibility ≥ 95.",Todo,High,seo,M9: QA + Launch
+Final security check,"REVALIDATE_SECRET is 32+ chars, not in git. No .env.local committed. Supabase RLS enabled on every table. Service role key not in this repo.",Todo,High,qa,M9: QA + Launch
+Client handoff,"Record loom walkthrough: editing pages, blog, nav, settings via client-portal. Share Vercel access (view only). Mark project live in Agency Hub.",Todo,High,chore,M9: QA + Launch
+```
