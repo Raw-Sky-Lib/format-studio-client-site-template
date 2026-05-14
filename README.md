@@ -133,7 +133,7 @@ After every save in the portal, it calls `POST /api/revalidate` on this site to 
 
 ## Adding / Removing Modules
 
-See [EXTENDING.md](EXTENDING.md) for step-by-step instructions on:
+See [EXTENDING.md](.claude/EXTENDING.md) for step-by-step instructions on:
 - Adding a new section type (e.g. `pricing`, `team`)
 - Adding a new content type (e.g. `services`, `events`)
 - Removing the portfolio module for clients who don't need it
