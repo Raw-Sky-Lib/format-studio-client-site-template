@@ -1,7 +1,17 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  images: {
+    remotePatterns: [
+      // Supabase Storage — replace `YOUR_PROJECT_REF` with the client's project ref
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      // Add any other image hosts the client uses (e.g. their own CDN)
+    ],
+  },
+}
 
-export default nextConfig;
+export default nextConfig
