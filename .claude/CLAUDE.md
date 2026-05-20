@@ -13,7 +13,7 @@ When the user types **"start"**, **"initiate project"**, or **"new client"**, ru
 
 Reply with exactly this:
 
-> Drop the client requirements file (markdown, text, or PDF) or paste the brief here. Include anything you have: project name, site URL, brand notes, pages needed, features (blog, portfolio, booking, etc.), Supabase ref, GitHub repo name.
+> Drop the client requirements file (markdown, text, or PDF) or paste the brief here. Include anything you have: project name, site URL, brand notes, pages needed, features (blog, portfolio, booking, etc.), GitHub repo name.
 
 Wait for the user to provide it. Do not proceed until you have received the requirements brief.
 
@@ -26,7 +26,6 @@ Read the requirements and extract the following. Ask only for anything that is g
 | `PROJECT_NAME` | Full client/project display name |
 | `CLIENT_SLUG` | Lowercase, hyphenated (e.g. `acme-studio`) |
 | `TEAM_ID` | 2–3 uppercase initials from project name (e.g. `AS`) — ask to confirm |
-| `SUPABASE_REF` | From requirements, or leave `[SUPABASE_REF]` if not yet known |
 | `GITHUB_REPO` | From requirements, or derive as `client-{CLIENT_SLUG}` |
 | `SITE_URL` | From requirements, or leave `[SITE_URL]` if not yet known |
 | **Blog?** | Yes / No — inferred from requirements |
@@ -64,7 +63,7 @@ Once confirmed, output two things:
 
 Start from the template in `.claude/LINEAR-SETUP.md`. Replace all `{{PLACEHOLDERS}}` with real values. Remove optional milestone sections (M6, M7, M8) that don't apply. For any custom features, add issues to M8 with sequential numbering continuing from where the standard issues end. Renumber all issues sequentially starting from `{TEAM_ID}-1`.
 
-Tell the user: "Save this as `.claude/LINEAR-SETUP.md` in the cloned project repo."
+Tell the user: "Save this as `.claude/LINEAR-SETUP.md` in the project repo."
 
 **B) CSV import block**
 
@@ -76,15 +75,7 @@ Tell the user: "Save this as `{CLIENT_SLUG}-linear-import.csv` and import via Li
 
 After outputting both files, immediately walk through M0 without waiting for a prompt:
 
-1. Tell the user to clone the repo:
-   ```
-   git clone https://github.com/[ORG]/[GITHUB_REPO].git && cd [GITHUB_REPO]
-   ```
-2. Output the exact `supabase link` command:
-   ```
-   supabase link --project-ref [SUPABASE_REF]
-   ```
-3. Tell the user to create `.env.local` at the project root and fill it in from the Agency Hub client record. Output this template — do not pre-fill values, do not ask for values in chat:
+1. Tell the user to create `.env.local` at the project root and fill it in from the Agency Hub client record. Output this template — do not pre-fill values, do not ask for values in chat:
    ```env
    # [PROJECT_NAME] — local development
    # Fill these in from the Agency Hub client record. Never commit this file.
@@ -96,7 +87,16 @@ After outputting both files, immediately walk through M0 without waiting for a p
 
    NEXT_PUBLIC_SITE_URL=        # e.g. https://[CLIENT_SLUG].com
    ```
-4. Tell the user which migrations to run first and in what order, based on the schema for this project.
+   Ask the user to confirm once `.env.local` is filled in before continuing.
+
+2. Once the user confirms `.env.local` is ready, run all of the following automatically — do not ask the user to do any of these steps:
+   a. Read `.env.local`. Extract the Supabase project ref from `NEXT_PUBLIC_SUPABASE_URL` — it is the subdomain before `.supabase.co` (e.g. `https://abcdefghijkl.supabase.co` → ref is `abcdefghijkl`).
+   b. Run: `supabase link --project-ref <extracted-ref>`
+   c. Run migrations via Supabase MCP in this order, confirming each before proceeding:
+      - Always: `supabase/migrations/001_core.sql`, `supabase/migrations/002_rls.sql`
+      - If blog module applies: `supabase/migrations/003_blog.sql`
+      - If portfolio module applies: `supabase/migrations/004_portfolio.sql`
+   d. Tell the user M0 is complete and confirm which migrations ran. Suggest `pnpm install && pnpm dev` to verify the setup.
 
 ---
 
