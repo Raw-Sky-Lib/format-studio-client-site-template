@@ -96,10 +96,10 @@ Cycle 5: M9            — QA and launch
 
 **{{TEAM_ID}}-2** Configure environment variables
 `chore` `infra` · Priority: Urgent · M0
-- Create `.env.local` with all required vars
-- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `AGENCY_API_URL`, `AGENCY_CLIENT_ID`, `AGENCY_MANAGEMENT_TOKEN`
-- `REVALIDATE_SECRET` (generate: `openssl rand -hex 32`)
+- Create `.env.local` at project root (never commit this file)
+- `NEXT_PUBLIC_SUPABASE_URL` — from Agency Hub client record
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — from Agency Hub client record
+- `REVALIDATE_SECRET` — generate: `openssl rand -hex 32`
 - `NEXT_PUBLIC_SITE_URL={{SITE_URL}}`
 - Confirm `pnpm dev` starts without errors
 
@@ -443,7 +443,7 @@ Cycle 5: M9            — QA and launch
 ```csv
 Title,Description,Status,Priority,Label,Milestone
 Fork template + local setup,"Fork format-studio-client-site-template → {{GITHUB_REPO}}. Clone locally. Run pnpm install. Confirm no errors. Rename package.json name to {{CLIENT_SLUG}}.",Todo,Urgent,chore,M0: Bootstrap
-Configure environment variables,"Create .env.local: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, AGENCY_API_URL, AGENCY_CLIENT_ID, AGENCY_MANAGEMENT_TOKEN, REVALIDATE_SECRET (openssl rand -hex 32), NEXT_PUBLIC_SITE_URL={{SITE_URL}}. Confirm pnpm dev starts.",Todo,Urgent,chore,M0: Bootstrap
+Configure environment variables,"Create .env.local at project root (never commit). NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY from Agency Hub client record. REVALIDATE_SECRET (openssl rand -hex 32). NEXT_PUBLIC_SITE_URL={{SITE_URL}}. Confirm pnpm dev starts.",Todo,Urgent,chore,M0: Bootstrap
 Connect to client Supabase project,"supabase link --project-ref {{SUPABASE_REF}}. Confirm connection with supabase db pull.",Todo,Urgent,infra,M0: Bootstrap
 Run core migrations (001–002),"001_core.sql: site_settings, nav_items, pages, form_submissions, media. 002_rls.sql: RLS on all tables. Verify in Supabase dashboard.",Todo,Urgent,infra,M1: Supabase Schema
 Run blog migration (003),"[OPTIONAL] 003_blog.sql: posts table + RLS. Skip if no blog.",Todo,Urgent,infra,M1: Supabase Schema
