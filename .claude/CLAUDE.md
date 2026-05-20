@@ -105,10 +105,14 @@ After outputting both files, immediately walk through M0 without waiting for a p
 A template that Format Studio clones for each new client website. It only works in conjunction with:
 
 - **Client's Supabase project** — content database, anon key + RLS
-- **Client Portal** — the CMS that reads/writes all content and triggers ISR
+- **Client Portal** — the CMS the client uses to manage content after launch
 - **Agency Hub** — registers the client, pushes credentials to the portal, sends the invite
 
 When working on a cloned client site, changes stay in that client's repo. Changes here only affect future clients.
+
+**Who builds the first site:** The developer and Claude build the full site — all pages, sections, and content are coded and seeded directly into the client's Supabase during the project. The client receives a finished, content-populated, live site. Content is never left as placeholder stubs.
+
+**What the client portal is for:** Ongoing CMS management after handoff — the client updates copy, hero text, blog posts, nav items, site settings, etc. The portal is not used during the initial build phase. The developer and Claude seed all initial content from the requirements brief directly via Supabase MCP.
 
 ---
 
@@ -117,13 +121,15 @@ When working on a cloned client site, changes stay in that client's repo. Change
 ```
 Agency Hub
   ↓ registers client, pushes Supabase credentials to portal, sends invite email
-Client Portal (CMS)
+Client Portal (CMS — post-launch management only)
   ↓ client logs in, reads/writes content to their Supabase
   ↓ portal backend calls POST /api/revalidate after every content save
 Client Site (this repo)
   ↑ reads content from Supabase at build/request time
   ↑ serves public site via Next.js ISR
 ```
+
+> The developer and Claude seed all initial content directly into Supabase during the build phase. The portal is not involved in the first build.
 
 ---
 
@@ -202,11 +208,13 @@ See [EXTENDING.md](EXTENDING.md) for:
 ## Do Not
 
 - Do not fetch data client-side — use Server Components + `queries.ts`
-- Do not hardcode content — everything comes from Supabase
+- Do not hardcode content in components — all text, images, and copy come from Supabase
+- Do not seed placeholder or stub content — seed real content from the client brief
 - Do not put the service role key anywhere in this repo
 - Do not bypass `REVALIDATE_SECRET` validation in `/api/revalidate`
 - Do not add client-specific styles in component files — use `globals.css` tokens
 - Do not call client-portal or agency-hub APIs from this site
+- Do not start building any layout, page, or section without first requesting the Pencil reference design for that phase — ask the user to share it before writing any component code
 
 ---
 
@@ -228,4 +236,4 @@ Sprint 2 (M3 + M4): Layout and home page
   ...
 ```
 
-Estimate days per issue based on complexity. Flag any issue that depends on a Pencil design being done first.
+Estimate days per issue based on complexity. For every build phase that has a corresponding design phase (M3, M4, M5, M6, M7, M8), note that Claude must request the Pencil reference design before starting any component work in that phase.

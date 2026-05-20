@@ -129,11 +129,11 @@ Cycle 5: M9            — QA and launch
 - Claude runs `004_portfolio.sql` — projects, project_images + RLS
 - Verify both tables with RLS enabled
 
-**{{TEAM_ID}}-7** Seed initial content
+**{{TEAM_ID}}-7** Seed full initial content
 `infra` · Priority: High · M1
-- Seed `site_settings`: site_name, tagline, contact email, SEO defaults, social links
+- Seed `site_settings`: site_name, tagline, contact email, SEO defaults, social links — use real values from the client brief
 - Seed `nav_items`: initial navigation (Home, About, Contact [Blog] [Work])
-- Seed `pages`: home, about, contact stubs (title + empty sections array)
+- Seed `pages`: home, about, contact with real section content from the brief — not placeholder stubs
 - Confirm seeded data readable via Supabase dashboard
 
 ---
@@ -446,7 +446,7 @@ Connect to client Supabase project,"Claude derives project ref from NEXT_PUBLIC_
 Run core migrations (001–002),"Claude runs 001_core.sql (site_settings, nav_items, pages, form_submissions, media) and 002_rls.sql (RLS on all tables) via Supabase MCP. Verify in Supabase dashboard.",Todo,Urgent,infra,M1: Supabase Schema
 Run blog migration (003),"[OPTIONAL] Claude runs 003_blog.sql (posts table + RLS) via Supabase MCP. Skip if no blog.",Todo,Urgent,infra,M1: Supabase Schema
 Run portfolio migration (004),"[OPTIONAL] Claude runs 004_portfolio.sql (projects + project_images + RLS) via Supabase MCP. Skip if no portfolio.",Todo,Urgent,infra,M1: Supabase Schema
-Seed initial content,"Seed site_settings (site_name, tagline, contact email, SEO defaults, socials). Seed nav_items. Seed pages: home, about, contact stubs.",Todo,High,infra,M1: Supabase Schema
+Seed full initial content,"Seed site_settings with real values from client brief (site_name, tagline, contact email, SEO defaults, socials). Seed nav_items. Seed pages with real section content from brief — no placeholder stubs.",Todo,High,infra,M1: Supabase Schema
 Configure design tokens in globals.css,"Map brand tokens: --color-bg, --color-surface, --color-border, --color-text, --color-text-muted, --color-accent. Set fonts. Write prose styles. Names are permanent.",Todo,Urgent,design,M2: Config + Types
 Configure next.config.ts,"images.remotePatterns for <ref>.supabase.co — derive ref from NEXT_PUBLIC_SUPABASE_URL. Add any other image hosts.",Todo,High,chore,M2: Config + Types
 Set up Supabase client files,"src/lib/supabase/server.ts (Server Components). src/lib/supabase/client.ts (browser forms only).",Todo,High,chore,M2: Config + Types
