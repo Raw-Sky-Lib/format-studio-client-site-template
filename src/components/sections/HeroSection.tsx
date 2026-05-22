@@ -4,11 +4,12 @@ import type { HeroSection as HeroSectionType } from '@/types/content'
 
 interface Props {
   section: HeroSectionType
+  id?: string
 }
 
-export default function HeroSection({ section }: Props) {
+export default function HeroSection({ section, id }: Props) {
   return (
-    <section className="relative overflow-hidden py-20 sm:py-28 lg:py-36">
+    <section id={id} className="relative overflow-hidden py-20 sm:py-28 lg:py-36">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className={`flex flex-col gap-12 ${section.image_url ? 'lg:flex-row lg:items-center' : ''}`}>
           <div className="flex flex-col gap-6 lg:flex-1">

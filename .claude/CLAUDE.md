@@ -162,6 +162,107 @@ media(filename, url, mime_type)                     → media library metadata
 - **Time-based:** `export const revalidate = 3600` on all layouts/pages
 - **On-demand:** `POST /api/revalidate` → validates `X-Revalidate-Secret` → `revalidatePath()`
 
+After the client-portal saves content to Supabase it immediately calls `POST /api/revalidate`.
+The live site reflects the change on the next visitor request — no rebuild, no redeploy.
+
+---
+
+## Sections Data Shape — Critical Contract
+
+`pages.sections` is stored in Supabase as a **JSON array**. Every element carries a `type` field.
+
+```json
+[
+  { "type": "hero",     "headline": "...", "subheadline": "...", "cta_label": "...", "cta_url": "..." },
+  { "type": "features", "title": "...",   "items": [...] },
+  { "type": "cta",      "headline": "...", "button_label": "...", "button_url": "..." }
+]
+```
+
+**Never store sections as a keyed object** (`{ hero: {...}, features: {...} }`).
+The portal CMS, the template renderer, and the `SectionEditor` all depend on the array format.
+
+Adding a new section: append an object with the correct `type` to the array.
+Removing a section: remove the element from the array.
+Reordering: change the position in the array — array order is render order.
+
+---
+
+## Portal CMS Integration
+
+The client-portal embeds this site in an iframe for live content editing.
+Three files wire up that integration — **do not delete or break them**.
+
+### PortalBridge (`src/components/layout/PortalBridge.tsx`)
+
+Mounted once in the root layout. Has no effect when the site is viewed in a normal browser tab (`window.self === window.top` guard). Inside the portal iframe it:
+
+| Message received | Action |
+|-----------------|--------|
+| `PORTAL_SET_MODE: 'edit'` | Adds `__portal-edit-mode` class to `<body>` — enables cursor + click interception |
+| `PORTAL_SET_MODE: 'preview'` | Removes class, clears all highlights |
+| `PORTAL_SCROLL_TO: { section }` | Scrolls to `<section id={section}>`, adds highlight outline |
+| `PORTAL_UPDATE_SECTION: { sections }` | Calls `setPreviewSections()` in PreviewContext — instant live update |
+
+| Message sent | When |
+|-------------|------|
+| `PORTAL_SECTION_CLICK: { section }` | User clicks a `<section id>` in edit mode |
+| `PORTAL_SECTION_VISIBLE: { section }` | Most-visible section changes (debounced, scroll observer) |
+
+PortalBridge defaults to edit mode on mount — the portal sends `PORTAL_SET_MODE: 'preview'` if needed.
+In edit mode, `e.preventDefault()` + `e.stopPropagation()` are called on every click inside the iframe so links don't navigate and site JS handlers don't fire.
+
+### PreviewContext (`src/contexts/preview-context.tsx`)
+
+Client-side context holding portal-injected section overrides. Only activates inside an iframe.
+
+`PreviewSections` reads the full sections array from context and re-renders the whole page when the portal sends an update — individual section components don't need to import or call any context hook. They just render whatever `section` prop they receive, which is already the portal-injected version when editing.
+
+```typescript
+// PreviewSections handles the swap — section components are untouched:
+export function PreviewSections({ ssrSections }: Props) {
+  const previewSections = usePreviewSections()   // null on public site
+  const sections = previewSections ?? ssrSections
+  return <>{sections.map(s => <SectionRenderer section={s} />)}</>
+}
+```
+
+### Section Manifest (`src/components/sections/manifest.ts`)
+
+Defines every available section type, its fields, and their types. The portal's SectionEditor reads this manifest to generate its editor UI — if a field is not in the manifest the portal cannot edit it.
+
+```typescript
+export const sectionManifest = {
+  hero: {
+    label: 'Hero',
+    fields: {
+      headline:    { type: 'text',  label: 'Headline',   required: true },
+      subheadline: { type: 'text',  label: 'Subheadline' },
+      cta_label:   { type: 'text',  label: 'Button text' },
+      cta_url:     { type: 'url',   label: 'Button URL' },
+      image_url:   { type: 'image', label: 'Image' },
+    }
+  },
+  // one entry per section type
+} satisfies SectionManifest
+```
+
+**Whenever you add a new section type you must update the manifest.** The portal will not show any editor fields for types missing from the manifest.
+
+### SectionRenderer contract
+
+`SectionRenderer` must pass `id={section.type}` to every section component, and every section component must put that `id` on its root `<section>` element. This is what PortalBridge uses for scroll targeting and click detection.
+
+```tsx
+// SectionRenderer.tsx
+case 'hero':
+  return <HeroSection section={section} id={section.type} />
+
+// HeroSection.tsx
+export default function HeroSection({ section, id }: Props) {
+  return <section id={id} ...>
+```
+
 ---
 
 ## Design System
@@ -207,13 +308,16 @@ See [EXTENDING.md](EXTENDING.md) for:
 
 ## Do Not
 
-- Do not fetch data client-side — use Server Components + `queries.ts`
+- Do not fetch data client-side — use Server Components + `queries.ts` (exception: PreviewContext is client-side but only activates inside the portal iframe)
 - Do not hardcode content in components — all text, images, and copy come from Supabase
 - Do not seed placeholder or stub content — seed real content from the client brief
 - Do not put the service role key anywhere in this repo
 - Do not bypass `REVALIDATE_SECRET` validation in `/api/revalidate`
 - Do not add client-specific styles in component files — use `globals.css` tokens
 - Do not call client-portal or agency-hub APIs from this site
+- Do not store sections as a keyed object — always use the `PageSection[]` array format
+- Do not add a new section type without updating `src/components/sections/manifest.ts` — the portal cannot edit fields that are not in the manifest
+- Do not remove `id={section.type}` from SectionRenderer or the `id` prop from section components — this breaks portal scroll targeting and click detection
 - Do not start building any layout, page, or section without first requesting the Pencil reference design for that phase — ask the user to share it before writing any component code
 
 ---

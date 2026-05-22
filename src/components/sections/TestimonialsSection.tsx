@@ -3,11 +3,12 @@ import type { TestimonialsSection as TestimonialsSectionType } from '@/types/con
 
 interface Props {
   section: TestimonialsSectionType
+  id?: string
 }
 
-export default function TestimonialsSection({ section }: Props) {
+export default function TestimonialsSection({ section, id }: Props) {
   return (
-    <section className="py-16 sm:py-24">
+    <section id={id} className="py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {section.title && (
           <h2 className="mb-12 text-3xl font-bold tracking-tight text-[var(--color-text)] sm:text-4xl">

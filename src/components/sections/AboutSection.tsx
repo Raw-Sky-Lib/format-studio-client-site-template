@@ -3,11 +3,12 @@ import type { AboutSection as AboutSectionType } from '@/types/content'
 
 interface Props {
   section: AboutSectionType
+  id?: string
 }
 
-export default function AboutSection({ section }: Props) {
+export default function AboutSection({ section, id }: Props) {
   return (
-    <section className="py-16 sm:py-24">
+    <section id={id} className="py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className={`flex flex-col gap-12 ${section.image_url ? 'lg:flex-row lg:items-center' : ''}`}>
           <div className="flex flex-col gap-6 lg:flex-1">

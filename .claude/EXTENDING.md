@@ -6,7 +6,7 @@ This document explains how to add new content types and section types to a clien
 
 ## Adding a New Section Type
 
-Sections live in the `sections` JSONB column of the `pages` table. No migration needed — sections are free-form. You only need to:
+Sections live in the `sections` JSONB column of the `pages` table. No migration needed — sections are free-form. You need to update four files:
 
 **1. Define the type in `src/types/content.ts`**
 
@@ -29,13 +29,22 @@ export type PageSection =
 
 **2. Create the component at `src/components/sections/PricingSection.tsx`**
 
+The component must accept an `id` prop and put it on the root `<section>` element — this is required for portal scroll targeting and click detection.
+
+Live preview works automatically — `PreviewSections` swaps the full sections array when the portal sends an update, so `section` already contains the latest portal data by the time it reaches this component. No context import needed.
+
 ```typescript
 import type { PricingSection as PricingSectionType } from '@/types/content'
 
-export default function PricingSection({ section }: { section: PricingSectionType }) {
+interface Props {
+  section: PricingSectionType
+  id?: string
+}
+
+export default function PricingSection({ section, id }: Props) {
   return (
-    <section className="py-16 sm:py-24">
-      {/* ... */}
+    <section id={id} className="py-16 sm:py-24">
+      {/* render section fields directly — portal preview is handled upstream */}
     </section>
   )
 }
@@ -43,14 +52,38 @@ export default function PricingSection({ section }: { section: PricingSectionTyp
 
 **3. Add a case to `src/components/sections/SectionRenderer.tsx`**
 
+Pass `id={section.type}` — do not omit this.
+
 ```typescript
 import PricingSection from './PricingSection'
 
 case 'pricing':
-  return <PricingSection section={section} />
+  return <PricingSection section={section} id={section.type} />
 ```
 
-**4. Tell Format Studio** to add the section type to the client-portal's section editor list for this client. The portal stores the JSONB with `type: 'pricing'` — the renderer picks it up automatically.
+**4. Add to `src/components/sections/manifest.ts`**
+
+This is required for the client-portal to show an editor UI for this section. If a field is missing from the manifest the portal cannot edit it.
+
+```typescript
+pricing: {
+  label: 'Pricing',
+  fields: {
+    title: { type: 'text', label: 'Heading' },
+    items: {
+      type: 'list',
+      label: 'Plans',
+      item: {
+        name:     { type: 'text', label: 'Plan name' },
+        price:    { type: 'text', label: 'Price' },
+        features: { type: 'list', label: 'Features', item: { type: 'text' } },
+      }
+    }
+  }
+}
+```
+
+The portal picks up the new section type automatically — no portal code changes needed.
 
 ---
 

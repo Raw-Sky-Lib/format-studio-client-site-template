@@ -3,11 +3,12 @@ import type { CTASection as CTASectionType } from '@/types/content'
 
 interface Props {
   section: CTASectionType
+  id?: string
 }
 
-export default function CTASection({ section }: Props) {
+export default function CTASection({ section, id }: Props) {
   return (
-    <section className="py-16 sm:py-24">
+    <section id={id} className="py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-6 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-[var(--color-text)] sm:text-4xl">

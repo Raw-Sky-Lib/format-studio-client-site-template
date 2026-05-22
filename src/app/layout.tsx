@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { getSiteConfig } from '@/lib/queries'
+import PortalBridge from '@/components/layout/PortalBridge'
+import { PreviewProvider } from '@/contexts/preview-context'
 
 // To change fonts: import from 'next/font/google' here and apply the
 // CSS variable to <html>. Then update --font-sans in globals.css.
@@ -26,7 +28,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen flex-col">{children}</body>
+      <body className="flex min-h-screen flex-col">
+        <PreviewProvider>
+          <PortalBridge />
+          {children}
+        </PreviewProvider>
+      </body>
     </html>
   )
 }

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getPageBySlug, getPageSlugs } from '@/lib/queries'
-import SectionRenderer from '@/components/sections/SectionRenderer'
+import { PreviewSections } from '@/components/sections/PreviewSections'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -28,16 +28,8 @@ export default async function DynamicPage({ params }: Props) {
   if (!page) notFound()
 
   return (
-    <div>
-      {page.sections.length === 0 ? (
-        <div className="flex min-h-96 items-center justify-center text-[var(--color-text-muted)]">
-          No sections yet — add them in the client portal.
-        </div>
-      ) : (
-        page.sections.map((section, i) => (
-          <SectionRenderer key={i} section={section} />
-        ))
-      )}
-    </div>
+    <main className="flex-1">
+      <PreviewSections ssrSections={page.sections} />
+    </main>
   )
 }
