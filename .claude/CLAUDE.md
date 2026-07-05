@@ -98,7 +98,11 @@ After outputting both files, immediately walk through M0 without waiting for a p
         - If portfolio applies and `projects`/`project_images` are missing → apply `004_portfolio.sql`.
         - If blog applies and `posts` is missing → apply `003_blog.sql`.
         - If `media` is missing → apply `006_media.sql` (creates the `media` table and `media` storage bucket).
-      - Verify RLS against the secure read-only model in `007_rls.sql` (anon: SELECT on published content, INSERT only on `form_submissions`; the portal writes via the service-role key, which bypasses RLS). Agency Hub's provisioning may leave RLS disabled on some tables or over-permissive (e.g. anon `ALL` on `site_settings`/`nav_items`, anon `SELECT`/`UPDATE` on `form_submissions`). If so, surface the gap to the user, then apply the corrective policies from `007_rls.sql` — using distinct policy names or dropping the permissive policies first to avoid conflicts.
+      - Verify RLS against the secure read-only model in `007_rls.sql` (anon: SELECT on published content, INSERT only on `form_submissions`; the portal writes via the service-role key, which bypasses RLS). Agency Hub's provisioning can leave a table in any of **three** bad states — check every table for all three:
+        1. **RLS disabled** — the table is fully exposed to anon (read AND write).
+        2. **RLS enabled with no policies** — a silent deny-all. The public site reads empty/blank with no error, so this looks "secure" but breaks the site. This is the easiest state to miss.
+        3. **RLS enabled but over-permissive** — e.g. anon `ALL` on `site_settings`/`nav_items`, or anon `SELECT`/`UPDATE` on `form_submissions`.
+      - If any are found, surface the gap to the user, then apply the corrective policies from `007_rls.sql` — using distinct policy names or dropping the permissive policies first to avoid conflicts.
    d. **Set up media storage folders** based on which sections the project uses:
       - Always create: `logo/` (every project needs a logo)
       - Create per section: hero with image → `hero/`, about → `about/`, blog → `blog/`, portfolio → `work/`, testimonials with avatars → `testimonials/`, team → `team/`
@@ -999,7 +1003,7 @@ See [EXTENDING.md](EXTENDING.md) for:
 - Do not hardcode image URLs or paths in component files — all media references come from Supabase Storage via section JSONB props or `site_settings`
 - Do not use external image hosts (Unsplash, CDNs, etc.) for content — upload real client assets to the `media` bucket
 - Do not skip media setup for a section that has an image field — seed real images from the brief, never leave `image_url` empty or as a placeholder URL
-- Do not start building any layout, page, or section without first requesting the Pencil reference design for that phase — ask the user to share it before writing any component code
+- Do not start building any layout, page, or section without first obtaining the Claude design reference for that phase — either a design-reference link the user shares or a design folder dropped into the repo (e.g. `design/`, holding screenshots/specs). Ask the user for it before writing any component code
 - Do not sanitise or re-parse embed field values — render them with `dangerouslySetInnerHTML` directly; the client is the trusted source
 - Do not add a new section with an embed field without declaring it `type: 'embed'` in the manifest — the portal will render a plain text box instead of the code editor
 - Do not leave `map_embed` or `embed_code` as a placeholder string — seed it from the brief or leave it as an empty string `""`
@@ -1024,4 +1028,4 @@ Sprint 2 (M3 + M4): Layout and home page
   ...
 ```
 
-Estimate days per issue based on complexity. For every build phase that has a corresponding design phase (M3, M4, M5, M6, M7, M8), note that Claude must request the Pencil reference design before starting any component work in that phase.
+Estimate days per issue based on complexity. For every build phase that has a corresponding design phase (M3, M4, M5, M6, M7, M8), note that Claude must obtain the Claude design reference — a link the user shares or a design folder dropped into the repo (e.g. `design/`) — before starting any component work in that phase.

@@ -42,7 +42,7 @@ Team identifier:  {{TEAM_ID}}   →  issues: {{TEAM_ID}}-1, {{TEAM_ID}}-2, ...
 | Label | Color | Use |
 |-------|-------|-----|
 | `frontend` | Blue `#3B82F6` | React/Next.js component or page work |
-| `design` | Purple `#8B5CF6` | Design implementation from Pencil/Variants |
+| `design` | Purple `#8B5CF6` | Design implementation from the Claude design reference |
 | `infra` | Gray `#6B7280` | Supabase, Vercel, DNS, env setup |
 | `seo` | Orange `#F97316` | Metadata, sitemap, robots, OG |
 | `chore` | Yellow `#EAB308` | Setup, config, scaffolding |
@@ -179,11 +179,11 @@ Cycle 5: M9            — QA and launch
 
 ### M3 — Layout
 
-**{{TEAM_ID}}-13** Design: Header + Footer (Pencil)
+**{{TEAM_ID}}-13** Design: Header + Footer (design reference)
 `design` · Priority: Urgent · M3
 - Design Header: logo, desktop nav, mobile hamburger, CTA button
 - Design Footer: site name, tagline, social links, contact, copyright
-- Export from Pencil before starting build
+- Obtain the design reference (link or repo `design/` folder) before starting build
 
 **{{TEAM_ID}}-14** Build Header
 `frontend` · Priority: Urgent · M3
@@ -191,14 +191,14 @@ Cycle 5: M9            — QA and launch
 - Logo, nav from `getNavItems()`, sticky with backdrop blur
 - `src/components/layout/NavLink.tsx` — `usePathname()` active state
 - `src/components/layout/MobileNav.tsx` — hamburger, closes on link click
-- Adapted from Pencil design ({{TEAM_ID}}-13)
+- Adapted from the design reference ({{TEAM_ID}}-13)
 
 **{{TEAM_ID}}-15** Build Footer
 `frontend` · Priority: High · M3
 - `src/components/layout/Footer.tsx` — Server Component
 - Site name, tagline, social links from `getSiteSettings()`
 - Copyright with current year
-- Adapted from Pencil design ({{TEAM_ID}}-13)
+- Adapted from the design reference ({{TEAM_ID}}-13)
 
 **{{TEAM_ID}}-16** Build root layout
 `frontend` · Priority: Urgent · M3
@@ -211,11 +211,11 @@ Cycle 5: M9            — QA and launch
 
 ### M4 — Home Page
 
-**{{TEAM_ID}}-17** Design: all home page sections (Pencil)
+**{{TEAM_ID}}-17** Design: all home page sections (design reference)
 `design` · Priority: Urgent · M4
 - Design HeroSection, FeaturesSection, AboutPreviewSection, TestimonialsSection, CTASection
 - Each section: empty state, populated state, mobile breakpoint
-- Export from Pencil before starting build
+- Obtain the design reference (link or repo `design/` folder) before starting build
 
 **{{TEAM_ID}}-18** Build HeroSection
 `frontend` · Priority: Urgent · M4
@@ -223,34 +223,34 @@ Cycle 5: M9            — QA and launch
 - All strings from JSONB (`headline`, `subheadline`, `cta_label`, `cta_url`, `image_url`)
 - Zero hardcoded strings
 - Framer Motion on page load
-- Adapted from Pencil design ({{TEAM_ID}}-17)
+- Adapted from the design reference ({{TEAM_ID}}-17)
 
 **{{TEAM_ID}}-19** Build FeaturesSection
 `frontend` · Priority: High · M4
 - `src/components/sections/FeaturesSection.tsx`
 - `title`, `items[]` from JSONB
 - Framer Motion stagger
-- Adapted from Pencil design ({{TEAM_ID}}-17)
+- Adapted from the design reference ({{TEAM_ID}}-17)
 
 **{{TEAM_ID}}-20** Build AboutPreviewSection
 `frontend` · Priority: High · M4
 - `src/components/sections/AboutPreviewSection.tsx`
 - `body`, `image_url`, `cta_label`, `cta_url` from JSONB
 - Framer Motion slide-in
-- Adapted from Pencil design ({{TEAM_ID}}-17)
+- Adapted from the design reference ({{TEAM_ID}}-17)
 
 **{{TEAM_ID}}-21** Build TestimonialsSection
 `frontend` · Priority: High · M4
 - `src/components/sections/TestimonialsSection.tsx`
 - `items[]` (`quote`, `author`, `role`, `avatar_url`) from JSONB
 - Framer Motion stagger
-- Adapted from Pencil design ({{TEAM_ID}}-17)
+- Adapted from the design reference ({{TEAM_ID}}-17)
 
 **{{TEAM_ID}}-22** Build CTASection
 `frontend` · Priority: Medium · M4
 - `src/components/sections/CTASection.tsx`
 - `headline`, `subheadline`, `button_label`, `button_url` from JSONB
-- Adapted from Pencil design ({{TEAM_ID}}-17)
+- Adapted from the design reference ({{TEAM_ID}}-17)
 
 **{{TEAM_ID}}-23** Build SectionRenderer + home page route
 `frontend` · Priority: Urgent · M4
@@ -270,18 +270,18 @@ Cycle 5: M9            — QA and launch
 
 ### M5 — Inner Pages
 
-**{{TEAM_ID}}-25** Design: About + Contact pages (Pencil)
+**{{TEAM_ID}}-25** Design: About + Contact pages (design reference)
 `design` · Priority: High · M5
 - About page: full layout, portrait image, bio, values/approach sections
 - Contact page: form layout, contact details
-- Export from Pencil before starting build
+- Obtain the design reference (link or repo `design/` folder) before starting build
 
 **{{TEAM_ID}}-26** Build About page
 `frontend` · Priority: High · M5
 - `src/app/(site)/about/page.tsx`
 - Reads page sections from `getPage('about')`
 - `generateMetadata()` from page SEO fields
-- Adapted from Pencil design ({{TEAM_ID}}-25)
+- Adapted from the design reference ({{TEAM_ID}}-25)
 
 **{{TEAM_ID}}-27** Build Contact page
 `frontend` · Priority: High · M5
@@ -289,7 +289,7 @@ Cycle 5: M9            — QA and launch
 - Reads content from `getPage('contact')`
 - Includes `<ContactForm />` wired to `POST /api/submit-form`
 - `generateMetadata()` from page SEO fields
-- Adapted from Pencil design ({{TEAM_ID}}-25)
+- Adapted from the design reference ({{TEAM_ID}}-25)
 
 **{{TEAM_ID}}-28** Build sitemap + robots
 `seo` · Priority: Medium · M5
@@ -303,18 +303,18 @@ Cycle 5: M9            — QA and launch
 
 > Delete this entire section if this client has no blog.
 
-**{{TEAM_ID}}-29** Design: Blog list + post page (Pencil)
+**{{TEAM_ID}}-29** Design: Blog list + post page (design reference)
 `design` · Priority: High · M6
 - Blog list: card grid, author, date, excerpt, cover image
 - Post page: full-width cover, title, metadata, rich text body
-- Export from Pencil before starting build
+- Obtain the design reference (link or repo `design/` folder) before starting build
 
 **{{TEAM_ID}}-30** Build blog list page
 `frontend` · Priority: High · M6
 - `src/app/(site)/blog/page.tsx`
 - Reads from `getPublishedPosts()`
 - `generateMetadata()` with blog description
-- Adapted from Pencil design ({{TEAM_ID}}-29)
+- Adapted from the design reference ({{TEAM_ID}}-29)
 
 **{{TEAM_ID}}-31** Build post detail page
 `frontend` · Priority: High · M6
@@ -323,7 +323,7 @@ Cycle 5: M9            — QA and launch
 - `generateStaticParams()` from `getPostSlugs()`
 - `generateMetadata()` from post SEO fields
 - Renders HTML content from Tiptap (sanitised)
-- Adapted from Pencil design ({{TEAM_ID}}-29)
+- Adapted from the design reference ({{TEAM_ID}}-29)
 
 ---
 
@@ -331,18 +331,18 @@ Cycle 5: M9            — QA and launch
 
 > Delete this entire section if this client has no portfolio/work section.
 
-**{{TEAM_ID}}-32** Design: Work grid + project page (Pencil)
+**{{TEAM_ID}}-32** Design: Work grid + project page (design reference)
 `design` · Priority: Medium · M7
 - Work grid: project cards with cover, title, category
 - Project detail: full hero, images, description
-- Export from Pencil before starting build
+- Obtain the design reference (link or repo `design/` folder) before starting build
 
 **{{TEAM_ID}}-33** Build work list page
 `frontend` · Priority: Medium · M7
 - `src/app/(site)/work/page.tsx`
 - Reads from `getPublishedProjects()`
 - `generateMetadata()`
-- Adapted from Pencil design ({{TEAM_ID}}-32)
+- Adapted from the design reference ({{TEAM_ID}}-32)
 
 **{{TEAM_ID}}-34** Build project detail page
 `frontend` · Priority: Medium · M7
@@ -350,7 +350,7 @@ Cycle 5: M9            — QA and launch
 - Reads from `getProjectBySlug(slug)` + `getProjectImages(id)`
 - `generateStaticParams()` from project slugs
 - `generateMetadata()` from project SEO fields
-- Adapted from Pencil design ({{TEAM_ID}}-32)
+- Adapted from the design reference ({{TEAM_ID}}-32)
 
 ---
 
@@ -452,11 +452,11 @@ Configure next.config.ts,"images.remotePatterns for <ref>.supabase.co — derive
 Set up Supabase client files,"src/lib/supabase/server.ts (Server Components). src/lib/supabase/client.ts (browser forms only).",Todo,High,chore,M2: Config + Types
 Write all TypeScript content types,"src/types/content.ts: SiteSettings, NavItem, Page, PageSection, FormSubmission, Media. Section types: HeroSection, FeaturesSection, AboutSection, TestimonialsSection, CTASection. [OPTIONAL] Post, Project, ProjectImage. All fields match DB exactly.",Todo,Urgent,frontend,M2: Config + Types
 Write all query functions,"src/lib/queries.ts: getSiteSettings(), getNavItems(), getPage(slug), getPublishedPages(). [OPTIONAL] getPublishedPosts(), getPostBySlug(), getPostSlugs(). [OPTIONAL] getPublishedProjects(), getProjectBySlug(), getProjectImages(). All throw on error.",Todo,Urgent,frontend,M2: Config + Types
-Design: Header + Footer (Pencil),"Design Header: logo, desktop nav, mobile hamburger, CTA button. Design Footer: site name, tagline, social links, contact, copyright. Export before build.",Todo,Urgent,design,M3: Layout
+Design: Header + Footer (design reference),"Design Header: logo, desktop nav, mobile hamburger, CTA button. Design Footer: site name, tagline, social links, contact, copyright. Obtain the design reference before build.",Todo,Urgent,design,M3: Layout
 Build Header,"src/components/layout/Header.tsx (Server Component). Logo, nav from getNavItems(), sticky with backdrop blur. NavLink.tsx: usePathname() active state. MobileNav.tsx: hamburger, closes on link click.",Todo,Urgent,frontend,M3: Layout
 Build Footer,"src/components/layout/Footer.tsx (Server Component). Site name, tagline, social links from getSiteSettings(). Copyright with year.",Todo,High,frontend,M3: Layout
 Build root layout,"src/app/layout.tsx: generateMetadata() from getSiteSettings(). Wire Header + Footer. title.template: '%s | {{PROJECT_NAME}}'. OG image default.",Todo,Urgent,frontend,M3: Layout
-Design: all home page sections (Pencil),"Design HeroSection, FeaturesSection, AboutPreviewSection, TestimonialsSection, CTASection. Each: empty state, populated state, mobile breakpoint. Export before build.",Todo,Urgent,design,M4: Home Page
+Design: all home page sections (design reference),"Design HeroSection, FeaturesSection, AboutPreviewSection, TestimonialsSection, CTASection. Each: empty state, populated state, mobile breakpoint. Obtain the design reference before build.",Todo,Urgent,design,M4: Home Page
 Build HeroSection,"src/components/sections/HeroSection.tsx + HeroSectionClient.tsx. All strings from JSONB. Zero hardcoded strings. Framer Motion on page load.",Todo,Urgent,frontend,M4: Home Page
 Build FeaturesSection,"src/components/sections/FeaturesSection.tsx. title + items[] from JSONB. Framer Motion stagger.",Todo,High,frontend,M4: Home Page
 Build AboutPreviewSection,"src/components/sections/AboutPreviewSection.tsx. body, image_url, cta_label, cta_url from JSONB. Framer Motion slide-in.",Todo,High,frontend,M4: Home Page
@@ -464,14 +464,14 @@ Build TestimonialsSection,"src/components/sections/TestimonialsSection.tsx. item
 Build CTASection,"src/components/sections/CTASection.tsx. headline, subheadline, button_label, button_url from JSONB.",Todo,Medium,frontend,M4: Home Page
 Build SectionRenderer + home page route,"src/components/sections/SectionRenderer.tsx: switch on section.type. src/app/(site)/page.tsx: getPage('home'), render sections. export const revalidate = 3600. generateMetadata().",Todo,Urgent,frontend,M4: Home Page
 Build contact form,"src/components/ContactForm.tsx ('use client'). POST to /api/submit-form. Client-side validation. Success/error states.",Todo,High,frontend,M4: Home Page
-Design: About + Contact pages (Pencil),"About: full layout, portrait, bio, values/approach sections. Contact: form layout, contact details. Export before build.",Todo,High,design,M5: Inner Pages
+Design: About + Contact pages (design reference),"About: full layout, portrait, bio, values/approach sections. Contact: form layout, contact details. Obtain the design reference before build.",Todo,High,design,M5: Inner Pages
 Build About page,"src/app/(site)/about/page.tsx. Reads sections from getPage('about'). generateMetadata().",Todo,High,frontend,M5: Inner Pages
 Build Contact page,"src/app/(site)/contact/page.tsx. Reads content from getPage('contact'). Includes ContactForm wired to POST /api/submit-form. generateMetadata().",Todo,High,frontend,M5: Inner Pages
 Build sitemap + robots,"src/app/sitemap.ts: static routes + dynamic page slugs. src/app/robots.ts: allow all, link to sitemap. Verify at {{SITE_URL}}/sitemap.xml.",Todo,Medium,seo,M5: Inner Pages
-Design: Blog list + post page (Pencil),"[OPTIONAL] Blog list: card grid, author, date, excerpt, cover. Post page: cover, title, metadata, rich text. Export before build.",Todo,High,design,M6: Blog
+Design: Blog list + post page (design reference),"[OPTIONAL] Blog list: card grid, author, date, excerpt, cover. Post page: cover, title, metadata, rich text. Obtain the design reference before build.",Todo,High,design,M6: Blog
 Build blog list page,"[OPTIONAL] src/app/(site)/blog/page.tsx. getPublishedPosts(). generateMetadata().",Todo,High,frontend,M6: Blog
 Build post detail page,"[OPTIONAL] src/app/(site)/blog/[slug]/page.tsx. getPostBySlug(slug). generateStaticParams(). generateMetadata() from post SEO fields. Render Tiptap HTML (sanitised).",Todo,High,frontend,M6: Blog
-Design: Work grid + project page (Pencil),"[OPTIONAL] Work grid: project cards with cover, title, category. Project detail: hero, images, description. Export before build.",Todo,Medium,design,M7: Portfolio
+Design: Work grid + project page (design reference),"[OPTIONAL] Work grid: project cards with cover, title, category. Project detail: hero, images, description. Obtain the design reference before build.",Todo,Medium,design,M7: Portfolio
 Build work list page,"[OPTIONAL] src/app/(site)/work/page.tsx. getPublishedProjects(). generateMetadata().",Todo,Medium,frontend,M7: Portfolio
 Build project detail page,"[OPTIONAL] src/app/(site)/work/[slug]/page.tsx. getProjectBySlug(slug) + getProjectImages(id). generateStaticParams(). generateMetadata().",Todo,Medium,frontend,M7: Portfolio
 Deploy to Vercel,"Import {{GITHUB_REPO}} into Vercel. Set all env vars (production values). Confirm pnpm build passes. Assign {{SITE_URL}} as custom domain.",Todo,Urgent,infra,M9: QA + Launch
