@@ -6,7 +6,9 @@ This document explains how to add new content types and section types to a clien
 
 ## Adding a New Section Type
 
-Sections live in the `sections` JSONB column of the `pages` table. No migration needed — sections are free-form. You need to update four files:
+> Quick-reference recipe. The full rules (bridge primitives, link patterns, icon strategy, image patterns, list patterns, file checklist) live in `CLAUDE.md` → "Editing Bridge — How to Build Section Components". Read that first, then follow this recipe.
+
+Sections live in the `sections` JSONB column of the `pages` table. No migration needed — sections are free-form. You update four files in this repo plus (if the section has lists) one file in the portal repo.
 
 **1. Define the type in `src/types/content.ts`**
 
@@ -17,24 +19,28 @@ export interface PricingSection {
   items: { name: string; price: string; features: string[] }[]
 }
 
+// Add to the SectionType union:
+export type SectionType =
+  | 'hero' | 'features' | 'about' | 'testimonials' | 'cta'
+  | 'why_us' | 'process' | 'featured_projects' | 'contact' | 'embed'
+  | 'pricing'   // ← add here
+
 // Add to the PageSection union:
 export type PageSection =
-  | HeroSection
-  | FeaturesSection
-  | AboutSection
-  | TestimonialsSection
-  | CTASection
-  | PricingSection  // ← add here
+  | HeroSection | FeaturesSection | AboutSection | TestimonialsSection | CTASection
+  | WhyUsSection | ProcessSection | FeaturedProjectsSection | ContactSection | EmbedSection
+  | PricingSection
 ```
 
 **2. Create the component at `src/components/sections/PricingSection.tsx`**
 
-The component must accept an `id` prop and put it on the root `<section>` element — this is required for portal scroll targeting and click detection.
+The component MUST be a client component (`'use client'`) so it can use the `useEditMode()` hook. Wrap every editable text field with `<Editable>`, every list with `<EditableList>`, every image with `<EditableImage>`. Pass placeholders so empty fields are visible in edit mode. Render an edit-mode shell for fields that may be empty (`(field || active) && …`).
 
-Live preview works automatically — `PreviewSections` swaps the full sections array when the portal sends an update, so `section` already contains the latest portal data by the time it reaches this component. No context import needed.
+```tsx
+'use client'
 
-```typescript
 import type { PricingSection as PricingSectionType } from '@/types/content'
+import { Editable, EditableList, useEditMode } from '@/lib/editing-bridge'
 
 interface Props {
   section: PricingSectionType
@@ -42,9 +48,44 @@ interface Props {
 }
 
 export default function PricingSection({ section, id }: Props) {
+  const { active } = useEditMode()
+
   return (
     <section id={id} className="py-16 sm:py-24">
-      {/* render section fields directly — portal preview is handled upstream */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {(section.title || active) && (
+          <h2 className="mb-12 text-3xl font-bold tracking-tight text-[var(--color-text)] sm:text-4xl">
+            <Editable path="pricing.title" placeholder="Pricing">
+              {section.title ?? ''}
+            </Editable>
+          </h2>
+        )}
+
+        {/* Grid classes go on EditableList — its direct children become grid items. */}
+        <EditableList
+          path="pricing.items"
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {section.items.map((item, i) => (
+            <div key={i} className="rounded-lg border border-[var(--color-border)] p-6">
+              <h3 className="text-lg font-semibold text-[var(--color-text)]">
+                <Editable path={`pricing.items[${i}].name`} placeholder="Plan name">
+                  {item.name}
+                </Editable>
+              </h3>
+              <p className="mt-2 text-2xl font-bold">
+                <Editable path={`pricing.items[${i}].price`} placeholder="$0">
+                  {item.price}
+                </Editable>
+              </p>
+              {/* features is a string[] — render flat; portal edits via JSON drawer for now */}
+              <ul className="mt-4 space-y-1 text-[var(--color-text-muted)]">
+                {item.features.map((f, j) => <li key={j}>· {f}</li>)}
+              </ul>
+            </div>
+          ))}
+        </EditableList>
+      </div>
     </section>
   )
 }
@@ -52,9 +93,9 @@ export default function PricingSection({ section, id }: Props) {
 
 **3. Add a case to `src/components/sections/SectionRenderer.tsx`**
 
-Pass `id={section.type}` — do not omit this.
+Pass `id={section.type}` — required so `PORTAL_SCROLL_TO` can land on the right element.
 
-```typescript
+```tsx
 import PricingSection from './PricingSection'
 
 case 'pricing':
@@ -63,27 +104,138 @@ case 'pricing':
 
 **4. Add to `src/components/sections/manifest.ts`**
 
-This is required for the client-portal to show an editor UI for this section. If a field is missing from the manifest the portal cannot edit it.
-
 ```typescript
 pricing: {
   label: 'Pricing',
   fields: {
-    title: { type: 'text', label: 'Heading' },
+    title: { type: 'text', label: 'Heading', placeholder: 'Pricing' },
     items: {
       type: 'list',
       label: 'Plans',
       item: {
-        name:     { type: 'text', label: 'Plan name' },
-        price:    { type: 'text', label: 'Price' },
-        features: { type: 'list', label: 'Features', item: { type: 'text' } },
-      }
-    }
+        name:     { type: 'text',     label: 'Plan name', required: true },
+        price:    { type: 'text',     label: 'Price',     placeholder: '$29/mo' },
+        features: { type: 'textarea', label: 'Features (one per line)' },
+      },
+    },
+  },
+}
+```
+
+**5. Add a `LIST_DEFAULTS` entry in the portal repo** (`Client-Management/web/src/features/pages/lib/defaults.ts`) for every list in the section:
+
+```typescript
+export const LIST_DEFAULTS = {
+  // …existing entries…
+  'pricing.items': { name: '', price: '', features: [] as string[] },
+}
+```
+
+This is the blank-item shape the portal inserts when the user clicks Add on an empty pricing list. Without this entry, Add will fall back to `{}` and your component will render a misshapen item.
+
+The portal picks up everything else automatically — no portal code changes needed beyond `LIST_DEFAULTS`.
+
+---
+
+## Adding Image Fields to a Section
+
+If a section has an image, declare it with `type: 'image'` in the manifest:
+
+```typescript
+// src/components/sections/manifest.ts
+hero: {
+  label: 'Hero',
+  fields: {
+    headline:    { type: 'text',  label: 'Headline', required: true },
+    image_url:   { type: 'image', label: 'Hero image' },   // ← image field
   }
 }
 ```
 
-The portal picks up the new section type automatically — no portal code changes needed.
+**What `type: 'image'` does:**
+- The portal renders this field as an `ImagePickerField` — a thumbnail preview + "Choose from media library" button that opens the client's Supabase Storage browser
+- The stored value in the section JSONB is always a full Supabase Storage public URL:
+  ```
+  https://{project-ref}.supabase.co/storage/v1/object/public/media/{folder}/{file}
+  ```
+- No FK reference — just a plain string URL
+
+**In the component**, render the image exactly like any other section prop:
+
+```typescript
+export default function HeroSection({ section, id }: Props) {
+  return (
+    <section id={id} className="...">
+      {section.image_url && (
+        <Image src={section.image_url} alt={section.headline} fill className="object-cover" />
+      )}
+    </section>
+  )
+}
+```
+
+**Storage folder setup**: when adding an image field to a new section type, document in the project's M0 setup which folder the images should be uploaded to (e.g. `hero/`, `about/`, `team/`). The developer creates the folder during M0 Step 5d and uploads the initial client image before handoff.
+
+---
+
+## Adding Embed Fields to a Section
+
+Embed fields hold a raw HTML string — typically a single `<iframe>` tag from Google Maps, Calendly, YouTube, Typeform, or any other third-party widget.
+
+**1. Declare with `type: 'embed'` in the manifest:**
+
+```typescript
+// src/components/sections/manifest.ts
+contact: {
+  label: 'Contact',
+  fields: {
+    address:   { type: 'text',  label: 'Address' },
+    email:     { type: 'text',  label: 'Email' },
+    map_embed: { type: 'embed', label: 'Map embed' },  // ← embed field
+  }
+}
+```
+
+**What `type: 'embed'` does in the portal:**
+- Renders as an `EmbedCodeField` — a monospace textarea where the client pastes the provider's embed code, with a toggleable sandboxed iframe preview below it
+- The stored value in the section JSONB is a raw HTML string (no transformation applied)
+
+**2. Render with `dangerouslySetInnerHTML` in the site component:**
+
+```typescript
+export default function ContactSection({ section, id }: Props) {
+  return (
+    <section id={id} className="...">
+      {/* text fields */}
+      <p>{section.address}</p>
+
+      {/* embed field — render the raw HTML the client pasted in the portal */}
+      {section.map_embed && (
+        <div
+          className="aspect-video w-full overflow-hidden rounded-xl"
+          dangerouslySetInnerHTML={{ __html: section.map_embed }}
+        />
+      )}
+    </section>
+  )
+}
+```
+
+Do not sanitise or re-parse the value. The client controls what they paste — render it as-is.
+
+**3. TypeScript type:**
+
+```typescript
+export interface ContactSection {
+  type: 'contact'
+  address?: string
+  email?: string
+  phone?: string
+  map_embed?: string  // raw <iframe> HTML or empty string
+}
+```
+
+**Seeding during M0:** if the client's brief includes a location, get the `<iframe>` from Google Maps → Share → Embed a map and seed it directly into the section JSONB. If no embed code is available, set the field to `""` — the client updates it themselves in the portal.
 
 ---
 

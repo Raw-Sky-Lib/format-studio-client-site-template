@@ -50,6 +50,15 @@ export default function PortalBridge() {
     if (typeof window === 'undefined') return
     if (window.self === window.top) return
 
+    // Stand aside when the NEW editing-bridge is driving the iframe.
+    // The new bridge is signaled by ?portal=edit on the URL. Without this
+    // guard, the capture-phase click handler below intercepts every click in
+    // the document — including the new bridge's Add/Remove/Change buttons —
+    // and calls preventDefault + stopPropagation, killing them silently.
+    // CP-11 will delete this entire file; the guard is the bridge fix until then.
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('portal') === 'edit') return
+
     ensureStyles()
     // Default to edit mode — portal sends PORTAL_SET_MODE:'preview' to disable interaction
     setEditMode(true)

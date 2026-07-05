@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getPageBySlug, getPageSlugs } from '@/lib/queries'
+import { getPageBySlug, getPageSlugs, getSiteConfig } from '@/lib/queries'
 import { PreviewSections } from '@/components/sections/PreviewSections'
 
 interface Props {
@@ -16,9 +16,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const page = await getPageBySlug(slug)
   if (!page) return {}
+  // Per-page social-share image, falling back to the site-wide default.
+  const config = await getSiteConfig()
+  const ogImage = page.og_image_url || config.og_image_url
+  const title = page.seo_title || page.title
+  const description = page.seo_description || undefined
   return {
-    title: page.seo_title || page.title,
-    description: page.seo_description || undefined,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: ogImage ? [{ url: ogImage }] : [],
+    },
   }
 }
 

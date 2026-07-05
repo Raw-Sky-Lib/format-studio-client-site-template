@@ -11,6 +11,11 @@ import FeaturesSection from './FeaturesSection'
 import AboutSection from './AboutSection'
 import TestimonialsSection from './TestimonialsSection'
 import CTASection from './CTASection'
+import WhyUsSection from './WhyUsSection'
+import ProcessSection from './ProcessSection'
+import FeaturedProjectsSection from './FeaturedProjectsSection'
+import ContactSection from './ContactSection'
+import EmbedSection from './EmbedSection'
 
 interface SectionRendererProps {
   section: PageSection
@@ -30,6 +35,16 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
       return <TestimonialsSection section={section} id={section.type} />
     case 'cta':
       return <CTASection section={section} id={section.type} />
+    case 'why_us':
+      return <WhyUsSection section={section} id={section.type} />
+    case 'process':
+      return <ProcessSection section={section} id={section.type} />
+    case 'featured_projects':
+      return <FeaturedProjectsSection section={section} id={section.type} />
+    case 'contact':
+      return <ContactSection section={section} id={section.type} />
+    case 'embed':
+      return <EmbedSection section={section} id={section.type} />
     default:
       return null
   }

@@ -43,7 +43,17 @@ export interface NavItem {
 // Pages & Sections
 // ---------------------------------------------------------------------------
 
-export type SectionType = 'hero' | 'features' | 'about' | 'testimonials' | 'cta'
+export type SectionType =
+  | 'hero'
+  | 'features'
+  | 'about'
+  | 'testimonials'
+  | 'cta'
+  | 'why_us'
+  | 'process'
+  | 'featured_projects'
+  | 'contact'
+  | 'embed'
 
 export interface HeroSection {
   type: 'hero'
@@ -94,12 +104,69 @@ export interface CTASection {
   button_url?: string
 }
 
+// ─── Additional section types (parity with portal types/index.ts) ───────────
+
+export interface WhyUsItem {
+  icon?: string
+  title: string
+  description: string
+}
+
+export interface WhyUsSection {
+  type: 'why_us'
+  title?: string
+  subtitle?: string
+  items: WhyUsItem[]
+}
+
+export interface ProcessStep {
+  number?: string | number
+  title: string
+  description: string
+}
+
+export interface ProcessSection {
+  type: 'process'
+  title?: string
+  subtitle?: string
+  steps: ProcessStep[]
+}
+
+export interface FeaturedProjectsSection {
+  type: 'featured_projects'
+  title?: string
+  subtitle?: string
+  cta_label?: string
+  cta_url?: string
+}
+
+export interface ContactSection {
+  type: 'contact'
+  title?: string
+  image_url?: string
+  address?: string
+  email?: string
+  phone?: string
+  map_embed?: string
+}
+
+export interface EmbedSection {
+  type: 'embed'
+  embed_code: string
+  caption?: string
+}
+
 export type PageSection =
   | HeroSection
   | FeaturesSection
   | AboutSection
   | TestimonialsSection
   | CTASection
+  | WhyUsSection
+  | ProcessSection
+  | FeaturedProjectsSection
+  | ContactSection
+  | EmbedSection
 
 export interface Page {
   id: string
@@ -108,6 +175,7 @@ export interface Page {
   sections: PageSection[]
   seo_title: string | null
   seo_description: string | null
+  og_image_url: string | null
   is_published: boolean
   updated_at: string
 }

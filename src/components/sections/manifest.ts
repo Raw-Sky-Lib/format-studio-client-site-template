@@ -93,4 +93,68 @@ export const sectionManifest = {
       button_url:   { type: 'url',      label: 'Button URL',   placeholder: '/contact' },
     },
   },
+
+  why_us: {
+    label: 'Why Us',
+    fields: {
+      title:    { type: 'text',     label: 'Heading',  placeholder: 'Why work with us' },
+      subtitle: { type: 'textarea', label: 'Subtitle' },
+      items: {
+        type: 'list',
+        label: 'Reasons',
+        item: {
+          icon:        { type: 'text',     label: 'Icon (emoji or name)' },
+          title:       { type: 'text',     label: 'Title',       required: true },
+          description: { type: 'textarea', label: 'Description', required: true },
+        },
+      },
+    },
+  },
+
+  process: {
+    label: 'Process',
+    fields: {
+      title:    { type: 'text',     label: 'Heading',  placeholder: 'How we work' },
+      subtitle: { type: 'textarea', label: 'Subtitle' },
+      steps: {
+        type: 'list',
+        label: 'Steps',
+        item: {
+          number:      { type: 'text',     label: 'Step number', placeholder: '01' },
+          title:       { type: 'text',     label: 'Title',       required: true },
+          description: { type: 'textarea', label: 'Description', required: true },
+        },
+      },
+    },
+  },
+
+  featured_projects: {
+    label: 'Featured Projects (CTA)',
+    fields: {
+      title:     { type: 'text',     label: 'Heading',     placeholder: 'See our work' },
+      subtitle:  { type: 'textarea', label: 'Subtitle' },
+      cta_label: { type: 'text',     label: 'Button text', placeholder: 'View projects' },
+      cta_url:   { type: 'url',      label: 'Button URL',  placeholder: '/work' },
+    },
+  },
+
+  contact: {
+    label: 'Contact',
+    fields: {
+      title:     { type: 'text',     label: 'Heading',   placeholder: 'Get in touch' },
+      image_url: { type: 'image',    label: 'Image' },
+      address:   { type: 'textarea', label: 'Address' },
+      email:     { type: 'text',     label: 'Email' },
+      phone:     { type: 'text',     label: 'Phone' },
+      map_embed: { type: 'textarea', label: 'Map embed HTML', placeholder: '<iframe src="..." />' },
+    },
+  },
+
+  embed: {
+    label: 'Embed',
+    fields: {
+      embed_code: { type: 'textarea', label: 'Embed HTML', required: true, placeholder: '<iframe src="..." />' },
+      caption:    { type: 'text',     label: 'Caption' },
+    },
+  },
 } satisfies SectionManifest

@@ -3,6 +3,7 @@ import './globals.css'
 import { getSiteConfig } from '@/lib/queries'
 import PortalBridge from '@/components/layout/PortalBridge'
 import { PreviewProvider } from '@/contexts/preview-context'
+import { EditingBridgeProvider } from '@/lib/editing-bridge'
 
 // To change fonts: import from 'next/font/google' here and apply the
 // CSS variable to <html>. Then update --font-sans in globals.css.
@@ -29,10 +30,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col">
-        <PreviewProvider>
-          <PortalBridge />
-          {children}
-        </PreviewProvider>
+        <EditingBridgeProvider>
+          <PreviewProvider>
+            <PortalBridge />
+            {children}
+          </PreviewProvider>
+        </EditingBridgeProvider>
       </body>
     </html>
   )
