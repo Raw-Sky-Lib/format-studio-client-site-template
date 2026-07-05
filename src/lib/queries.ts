@@ -2,7 +2,7 @@
 // Every function uses createServerSupabase() — these run in Server Components only.
 // For client-side reads (rare), use createClientSupabase() from lib/supabase/client.ts.
 
-import { createServerSupabase } from '@/lib/supabase/server'
+import { createServerSupabase, createStaticSupabase } from '@/lib/supabase/server'
 import type {
   SiteConfig,
   NavItem,
@@ -55,7 +55,7 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
 }
 
 export async function getPageSlugs(): Promise<string[]> {
-  const supabase = await createServerSupabase()
+  const supabase = createStaticSupabase()
   const { data, error } = await supabase
     .from('pages')
     .select('slug')
@@ -93,7 +93,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 }
 
 export async function getPostSlugs(): Promise<string[]> {
-  const supabase = await createServerSupabase()
+  const supabase = createStaticSupabase()
   const { data, error } = await supabase
     .from('posts')
     .select('slug')
@@ -153,7 +153,7 @@ export async function getProjectImages(projectId: string): Promise<ProjectImage[
 }
 
 export async function getProjectSlugs(): Promise<string[]> {
-  const supabase = await createServerSupabase()
+  const supabase = createStaticSupabase()
   const { data, error } = await supabase
     .from('projects')
     .select('slug')

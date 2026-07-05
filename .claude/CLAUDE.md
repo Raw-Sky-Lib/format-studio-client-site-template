@@ -80,14 +80,14 @@ After outputting both files, immediately walk through M0 without waiting for a p
    # [PROJECT_NAME] — local development
    # Fill these in from the Agency Hub client record. Never commit this file.
 
-   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_URL=     # base project URL ONLY: https://<ref>.supabase.co (no /rest/v1, no trailing slash)
    NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
    REVALIDATE_SECRET=           # generate: openssl rand -hex 32
 
    NEXT_PUBLIC_SITE_URL=        # e.g. https://[CLIENT_SLUG].com
    ```
-   Ask the user to confirm once `.env.local` is filled in before continuing.
+   Ask the user to confirm once `.env.local` is filled in before continuing. Note: `NEXT_PUBLIC_SUPABASE_URL` must be the base project URL (`https://<ref>.supabase.co`) — an Agency-Hub record sometimes stores the full REST endpoint (`.../rest/v1/`), which yields PGRST125 "Invalid path" on every read. The Supabase client files normalize a stray `/rest/v1` suffix or trailing slash defensively, but seed the value correctly regardless. `DATABASE_URL` is not used by the site — remove it from `.env.local` (reads use the anon key only). However, the current `/api/revalidate` route authenticates the portal's webhook against `SUPABASE_SERVICE_ROLE_KEY` (used purely as a server-side shared secret, never to build a privileged Supabase client), so that key must be present for on-demand ISR to work. This contradicts the separate `REVALIDATE_SECRET` design in the Environment Variables section — reconcile the two together with the portal before removing the key.
 
 2. Once the user confirms `.env.local` is ready, run all of the following automatically — do not ask the user to do any of these steps:
    a. Read `.env.local`. Extract the Supabase project ref from `NEXT_PUBLIC_SUPABASE_URL` — it is the subdomain before `.supabase.co` (e.g. `https://abcdefghijkl.supabase.co` → ref is `abcdefghijkl`).
@@ -974,6 +974,35 @@ See [EXTENDING.md](EXTENDING.md) for:
 - Adding a new section type (no migration — JSONB is free-form)
 - Adding a new content type (migration + types + queries + route)
 - Removing portfolio or blog module
+
+---
+
+## Upgrading a stale clone (editing bridge)
+
+A client site bootstrapped from an **older template version** (before the inline-editing bridge existed) will have a broken portal editor even though it "renders fine": the icon/image/link pickers and contentEditable don't respond. New clones are unaffected — the current template already ships the whole editing surface — so this only applies to pre-existing clones.
+
+**The failure is always a partial port.** The editing surface must be synced as a **set** — porting only `editing-bridge/` leaves the legacy `PortalBridge` without its `?portal=edit` stand-down guard, and it eats every click. Sync all of:
+
+| Path | Why |
+|------|-----|
+| `src/lib/editing-bridge/` | The bridge runtime + `Editable*` primitives |
+| `src/lib/icons/` | `SectionIcon` + curated icon sets used by `EditableIcon` |
+| `src/components/sections/` | Section components must wrap fields in the bridge primitives |
+| `src/types/content.ts` | Section-type definitions the new components import |
+| `src/contexts/preview-context.tsx` | Live-preview context, paired with `PreviewSections` |
+| `src/components/layout/PortalBridge.tsx` | **Must contain** `if (params.get('portal') === 'edit') return` — without this guard the legacy bridge fights the new one |
+| `src/app/layout.tsx` | Must mount `<EditingBridgeProvider>` (keep the client's `next/font` wiring) |
+| `package.json` deps | `@heroicons/react`, `@phosphor-icons/react`, `@tabler/icons-react`, `lucide-react` |
+
+Then **restart dev** (`rm -rf .next && pnpm dev`) — icon deps added mid-session won't load in a running server.
+
+Automated helper (run from the template repo root):
+
+```bash
+scripts/upgrade-editing-bridge.sh <path-to-client-clone>
+```
+
+It syncs the client-agnostic files, installs the icon deps, and prints the manual steps for `layout.tsx` (which carries per-client fonts and is not overwritten). Verify afterward under `?portal=edit` that the icon picker, image picker, and link editor all respond.
 
 ---
 
